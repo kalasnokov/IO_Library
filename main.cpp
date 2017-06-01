@@ -18,14 +18,22 @@ int main()
 
     inImage();
     inImage();
+
+    cout << "get/set start" << endl;
+
+    setInPos(-500);
+
     cout << getChar() << endl;
     cout << getInPos() << endl;
     setInPos(5);
     cout << getInPos() << endl;
 
     cout << retBufLen() << endl;
+
+    putChar('V');
+    outImage();
     //outImage();
 
-    cout << "Code has returned and is exiting" << endl;
+    cout <<endl<< "Code has returned and is exiting" << endl;
     return 0;
 }

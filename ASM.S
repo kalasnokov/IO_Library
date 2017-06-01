@@ -24,6 +24,9 @@ maxLen = 64
     .global setInPos
     .global getBufLen
     .global retBufLen
+    .global putChar
+    .global getOutPos
+    .global setOutPos
 
 foo:
 
@@ -57,7 +60,7 @@ mov %rdi,%rax
 ret
 
 
-inImage:
+inImage: #clears the inBuf, resets inPos to 0 and then takes user input
 
 mov $inBuf,%rdi
 call clearBuf
@@ -73,8 +76,9 @@ syscall
 ret
 
 
-outImage:
+outImage: #prints the content in outBuf
 
+movq $0,outPos
 mov $WRITE,%rax
 mov $STDOUT,%rdi
 mov $outBuf,%rsi
@@ -93,7 +97,7 @@ subq $8,outBuf
 ret
 
 
-clearBuf:
+clearBuf: #clears the buffert placed in rdi
 
 xor %rdi,%rdi
 
@@ -101,8 +105,22 @@ xor %rdi,%rdi
 ret
 
 
-getChar:
+getChar: #returns char in inBuf[inPos], if inPos == 64 or inBuf length == 0 inImage will be called
 
+leaq inBuf,%rdi
+call getBufLen
+
+cmp $0,%rax
+jne GCcont1
+call inImage
+
+GCcont1:
+
+cmp $64,inPos
+jne GCcont2
+call inImage
+
+GCcont2:
 leaq inBuf,%r8
 mov inPos,%r9
 mov (%r8,%r9,1),%rax
@@ -111,7 +129,7 @@ mov (%r8,%r9,1),%rax
 ret
 
 
-getInPos:
+getInPos: #returns inPos value
 
 movq inPos,%rax
 
@@ -119,34 +137,86 @@ movq inPos,%rax
 ret
 
 
-setInPos:
+setInPos: #sets inPos value, if input > maxLen then inPos == maxLen or if input < 0 then inPos == 0 (NEEDS MORE WORK, CONDITIONS NOT WORKING PROPERLY. SLEEP = NOW)
 
+cmp $maxLen,%rdi
+jl SIPcont1
+movq $maxLen,%rdi
+jmp SIPcont2
+
+SIPcont1:
+cmp $0,%rdi
+jg SIPcont2
+movq $0,%rdi
+
+SIPcont2:
 movq %rdi,inPos
 
 
 ret
 
 
-getBufLen:
+getBufLen: #takes loaded array position in rdi, returns length in rax
+
+mov %rdi,%rsi #position of array is now in rsi
+mov $0,%rdi #rdi used as counter
 
 loop:
-cmp $0,%rdi
-je return
+lodsb
+cmpb $0,%al
+jz SIPret
+cmp $65,%rdi
+jz SIPret
 
-return:
+inc %rdi
+jmp loop
 
+SIPret:
+
+decq %rdi
+mov %rdi, %rax
 
 ret
 
 
 retBufLen:
 
-movq $inBuf,%rdi
+leaq inBuf,%rdi
 call getBufLen
 
 
 ret
 
+
+putChar:
+
+leaq outBuf,%r8
+mov outPos,%r9
+mov %rdi,(%r8,%r9,1)
+incq outPos
+
+cmp $maxLen,outPos
+jne PCret
+call outImage
+PCret:
+
+ret
+
+
+getOutPos:
+
+movq outPos,%rax
+
+
+ret
+
+
+setOutPos:
+
+movq %rdi,outPos
+
+
+ret
 
 exit:
 mov $0,%ebx
