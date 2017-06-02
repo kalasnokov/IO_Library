@@ -10,12 +10,12 @@ namespace{
     extern "C" char getChar();
     extern "C" int getInPos();
     extern "C" void setInPos(int pos);
-    extern "C" int getText(int* addr, int amount);
     extern "C" int retBufLen();
     extern "C" void putChar(char c);
     extern "C" void setOutPos(int pos);
     extern "C" int getOutPos();
     extern "C" void putText(char*);
+    extern "C" int getText(char*, int);
 }
 
 #endif // IOLIB_H_INCLUDED
