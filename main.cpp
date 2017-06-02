@@ -21,14 +21,15 @@ int main()
 
     cout << "get/set start" << endl;
 
-    setInPos(-500);
+    setInPos(10);
 
-    cout << getChar() << endl;
-    cout << getInPos() << endl;
+    cout << "Char: " << getChar() << endl;
+    cout << "Pos: " << getInPos() << endl;
     setInPos(5);
-    cout << getInPos() << endl;
+    cout << "Char: " << getChar() << endl;
+    cout << "Pos: " << getInPos() << endl;
 
-    cout << retBufLen() << endl;
+    cout << "Length: " << retBufLen() << endl;
 
     putChar('V');
     outImage();

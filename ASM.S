@@ -137,19 +137,25 @@ movq inPos,%rax
 ret
 
 
-setInPos: #sets inPos value, if input > maxLen then inPos == maxLen or if input < 0 then inPos == 0 (NEEDS MORE WORK, CONDITIONS NOT WORKING PROPERLY. SLEEP = NOW)
+setInPos: #sets inPos value, if input > bufLen then inPos == bufLen or if input < 0 then inPos == 0
 
-cmp $maxLen,%rdi
-jl SIPcont1
-movq $maxLen,%rdi
-jmp SIPcont2
-
-SIPcont1:
-cmp $0,%rdi
-jg SIPcont2
+cmp $0,%edi
+jg SIPcont
 movq $0,%rdi
+jmp SIPret
 
-SIPcont2:
+SIPcont:
+
+movq %rdi,%rbx
+leaq inBuf,%rdi
+call getBufLen
+movq %rbx,%rdi
+
+cmpq %rax,%rdi
+jl SIPret
+movq %rax,%rdi
+subq $1,%rdi
+SIPret:
 movq %rdi,inPos
 
 
@@ -164,14 +170,14 @@ mov $0,%rdi #rdi used as counter
 loop:
 lodsb
 cmpb $0,%al
-jz SIPret
+jz GBLret
 cmp $65,%rdi
-jz SIPret
+jz GBLret
 
 inc %rdi
 jmp loop
 
-SIPret:
+GBLret:
 
 decq %rdi
 mov %rdi, %rax
@@ -188,7 +194,7 @@ call getBufLen
 ret
 
 
-putChar:
+putChar: #puts rdi at the outPos
 
 leaq outBuf,%r8
 mov outPos,%r9
@@ -211,12 +217,32 @@ movq outPos,%rax
 ret
 
 
-setOutPos:
+setOutPos:  #sets outPos value, if input > bufLen then outPos == bufLen or if input < 0 then outPos == 0
+
+cmp $0,%edi
+jg SOPcont
+movq $0,%rdi
+jmp SOPret
+
+SOPcont:
+
+movq %rdi,%rbx
+leaq outBuf,%rdi
+call getBufLen
+movq %rbx,%rdi
+
+cmpq %rax,%rdi
+jl SOPret
+movq %rax,%rdi
+subq $1,%rdi
+
+SOPret:
 
 movq %rdi,outPos
 
 
 ret
+
 
 exit:
 mov $0,%ebx
