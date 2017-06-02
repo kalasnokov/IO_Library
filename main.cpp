@@ -30,8 +30,12 @@ int main()
     cout << "Pos: " << getInPos() << endl;
 
     cout << "Length: " << retBufLen() << endl;
-
-    putChar('V');
+    for(int i=0;i<100;i++){
+        //putChar('V');
+    }
+    cout << "Pos: " << getOutPos() << endl;
+    char* s = "Mah boi, this peace is what all true warriors strive for! I just wonder what Gannon is ip to";
+    putText(s);
     outImage();
     //outImage();
 

@@ -90,11 +90,26 @@ call clearBuf
 ret
 
 
-putText:
+putText: #receives rdi as loaded inBuf, places content of loaded buf in outBuf from outPos and onwards (rdi,rsi,r8,r9,rax,inImage)
+mov %rdi,%rsi
+leaq outBuf,%rdi
 
-PTloop: #receives rdi as loaded inBuf, places content of loaded buf in outBuf from outPos and onwards (rdi)
+PTloop:
+lodsb
 
+mov inPos,%r9
+mov %al,(%rdi,%r9,1)
+incq inPos
 
+cmp $64,inPos
+jl PTcont
+
+call outImage #needs to have push/pop functions to prevent registry "corruption"
+
+PTcont:
+
+cmpb $0,%al
+jne PTloop
 
 ret
 
@@ -262,7 +277,7 @@ startMsg:
 
 inBuf: .space 64
 outBuf: .space 64
-workBud: .space 64
+workBuf: .space 64
 inPos: .quad 0
 outPos: .quad 0
 workPos: .quad 0

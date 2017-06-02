@@ -14,7 +14,8 @@ namespace{
     extern "C" int retBufLen();
     extern "C" void putChar(char c);
     extern "C" void setOutPos(int pos);
-    extern "C" char getOutPos();
+    extern "C" int getOutPos();
+    extern "C" void putText(char*);
 }
 
 #endif // IOLIB_H_INCLUDED
