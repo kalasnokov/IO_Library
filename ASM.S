@@ -60,7 +60,7 @@ mov %rdi,%rax
 ret
 
 
-inImage: #clears the inBuf, resets inPos to 0 and then takes user input
+inImage: #clears the inBuf, resets inPos to 0 and then takes user input (rdi,clearbuf,rax,rsi,rdx,syscall)
 
 mov $inBuf,%rdi
 call clearBuf
@@ -76,7 +76,7 @@ syscall
 ret
 
 
-outImage: #prints the content in outBuf
+outImage: #prints the content in outBuf (rax,rdi,rsi,rdx,clearBuf,syscall)
 
 movq $0,outPos
 mov $WRITE,%rax
@@ -84,20 +84,22 @@ mov $STDOUT,%rdi
 mov $outBuf,%rsi
 mov $maxLen,%rdx
 syscall
-
+movq $outBuf,%rdi
+call clearBuf
 
 ret
 
 
 putText:
 
-subq $8,outBuf
+PTloop: #receives rdi as loaded inBuf, places content of loaded buf in outBuf from outPos and onwards (rdi)
+
 
 
 ret
 
 
-clearBuf: #clears the buffert placed in rdi
+clearBuf: #clears the buffert placed in rdi (rdi)
 
 xor %rdi,%rdi
 
@@ -105,7 +107,7 @@ xor %rdi,%rdi
 ret
 
 
-getChar: #returns char in inBuf[inPos], if inPos == 64 or inBuf length == 0 inImage will be called
+getChar: #returns char in inBuf[inPos], if inPos == 64 or inBuf length == 0 inImage will be called (rdi,rax,inImage,r8,r9)
 
 leaq inBuf,%rdi
 call getBufLen
@@ -129,7 +131,7 @@ mov (%r8,%r9,1),%rax
 ret
 
 
-getInPos: #returns inPos value
+getInPos: #returns inPos value (rax)
 
 movq inPos,%rax
 
@@ -137,7 +139,7 @@ movq inPos,%rax
 ret
 
 
-setInPos: #sets inPos value, if input > bufLen then inPos == bufLen or if input < 0 then inPos == 0
+setInPos: #sets inPos value, if input > bufLen then inPos == bufLen or if input < 0 then inPos == 0 (rdi,rbx,rax)
 
 cmp $0,%edi
 jg SIPcont
@@ -162,7 +164,7 @@ movq %rdi,inPos
 ret
 
 
-getBufLen: #takes loaded array position in rdi, returns length in rax
+getBufLen: #takes loaded array position in rdi, returns length in rax (rdi,rax,rsi)
 
 mov %rdi,%rsi #position of array is now in rsi
 mov $0,%rdi #rdi used as counter
@@ -194,7 +196,7 @@ call getBufLen
 ret
 
 
-putChar: #puts rdi at the outPos
+putChar: #puts rdi at the outPos (rdi,r8,r9,outImage)
 
 leaq outBuf,%r8
 mov outPos,%r9
@@ -217,7 +219,7 @@ movq outPos,%rax
 ret
 
 
-setOutPos:  #sets outPos value, if input > bufLen then outPos == bufLen or if input < 0 then outPos == 0
+setOutPos:  #sets outPos value, if input > bufLen then outPos == bufLen or if input < 0 then outPos == 0 (rdi,rbx,rax)
 
 cmp $0,%edi
 jg SOPcont
