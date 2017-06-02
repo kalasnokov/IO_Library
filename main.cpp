@@ -34,8 +34,14 @@ int main()
         //putChar('V');
     }
     cout << "Pos: " << getOutPos() << endl;
-    char* s = "Mah boi, this peace is what all true warriors strive for! I just wonder what Gannon is ip to";
-    putText(s);
+    char* s = "My boy, this peace is what all true warriors strive for!";
+    //putText(s);
+    //outImage();
+    char* t = " I just wonder what Ganon is up to. ";
+    //putText(t);
+    //outImage();
+    char* v =  "My boy, this peace is what all true warriors strive for! I just wonder what Ganon is up to. You majesty, Ganon and his minions have seized the island of Koridai! Hmmm... How can we help? It is written: Only Link can defeat Ganon.";
+    putText(v);
     outImage();
     //outImage();
 

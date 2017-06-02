@@ -62,7 +62,7 @@ ret
 
 inImage: #clears the inBuf, resets inPos to 0 and then takes user input (rdi,clearbuf,rax,rsi,rdx,syscall)
 
-mov $inBuf,%rdi
+leaq inBuf,%rdi
 call clearBuf
 
 movq $0,inPos
@@ -84,39 +84,49 @@ mov $STDOUT,%rdi
 mov $outBuf,%rsi
 mov $maxLen,%rdx
 syscall
-movq $outBuf,%rdi
+leaq outBuf,%rdi
 call clearBuf
 
 ret
 
 
-putText: #receives rdi as loaded inBuf, places content of loaded buf in outBuf from outPos and onwards (rdi,rsi,r8,r9,rax,inImage)
+putText: #receives rdi as loaded inBuf, places content of loaded buf in outBuf from outPos and onwards (rdi,rsi,r9,rax,inImage)
 mov %rdi,%rsi
 leaq outBuf,%rdi
 
 PTloop:
 lodsb
 
-mov inPos,%r9
+mov outPos,%r9
 mov %al,(%rdi,%r9,1)
-incq inPos
+incq outPos
 
-cmp $64,inPos
+cmp $maxLen,outPos
 jl PTcont
+pushq %rsi
+pushq %rdi
 
-call outImage #needs to have push/pop functions to prevent registry "corruption"
+call outImage
 
+popq %rdi
+popq %rsi
 PTcont:
 
 cmpb $0,%al
 jne PTloop
 
+
 ret
 
 
-clearBuf: #clears the buffert placed in rdi (rdi)
+clearBuf: #clears the buffert loaded in rdi (rdi,r9)
 
-xor %rdi,%rdi
+mov $0,%r9
+CBloop:
+movq $0,(%rdi,%r9,1)
+incq %r9
+cmpq $maxLen,%r9
+jle CBloop
 
 
 ret
