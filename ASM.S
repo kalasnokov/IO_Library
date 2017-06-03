@@ -27,6 +27,7 @@ maxLen = 64
     .global putChar
     .global getOutPos
     .global setOutPos
+    .global getText
 
 foo:
 
@@ -135,7 +136,6 @@ ret
 
 
 getChar: #returns char in inBuf[inPos], if inPos == 64 or inBuf length == 0 inImage will be called (rdi,rax,inImage,r8,r9)
-
     leaq inBuf,%rdi
     call getBufLen
 
@@ -161,7 +161,6 @@ getChar: #returns char in inBuf[inPos], if inPos == 64 or inBuf length == 0 inIm
     getInPos: #returns inPos value (rax)
 
     movq inPos,%rax
-
 
 ret
 
@@ -213,8 +212,9 @@ getBufLen: #takes loaded array position in rdi, returns length in rax (rdi,rax,r
 
     decq %rdi
     mov %rdi, %rax
+    movq %rsi,%rdi
 
-    ret
+ret
 
 
     retBufLen:
@@ -276,10 +276,31 @@ setOutPos:  #sets outPos value, if input > bufLen then outPos == bufLen or if in
 ret
 
 
-getText: #receieves loaded address in rsi and lenght to read in rdi
+getText: #receieves loaded address in rdi and lenght to read in rsi, writes the content of inBuf to the first argument
 
+    leaq inBuf,%rcx #inBuf loaded into rcx
 
+    movq $0,%r8 #used as counter for parameter 1
+    mov inPos,%r9
 
+    GTloop:
+    mov (%rcx,%r9,1),%rdx #char value now loaded in rdx
+    incq %r9
+
+    mov %rdx,(%rdi,%r8,1) #char value moved to parameter 1 pos r8
+
+    incq %r8
+
+    cmpq $maxLen,%r9
+    je GTret
+
+    cmp %rsi,%r8
+    je GTret
+
+    jmp GTloop
+    GTret:
+
+    movq %r8,%rax
 
 ret
 
@@ -288,6 +309,9 @@ exit:
     mov $0,%ebx
     mov $1,%eax
     int $0x80
+
+
+
 
 .data
 msg:

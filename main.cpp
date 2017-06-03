@@ -45,6 +45,19 @@ int main()
     outImage();
     //outImage();
 
+    cout << endl;
+    char t2[100];
+    cout << getText(t2,10) << endl;
+    //getText(t,0);
+    for(int i=0;i<10;i++){
+        cout << t2[i];
+    }
+    cout << endl;
+        for(int i=0;i<10;i++){
+        cout << (int)t2[i]<<" ";
+    }
+    cout << endl;
+
     cout <<endl<< "Code has returned and is exiting" << endl;
     return 0;
 }

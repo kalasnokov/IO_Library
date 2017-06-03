@@ -15,7 +15,7 @@ namespace{
     extern "C" void setOutPos(int pos);
     extern "C" int getOutPos();
     extern "C" void putText(char*);
-    extern "C" int getText(char*, int);
+    extern "C" int getText(char* c, int i);
 }
 
 #endif // IOLIB_H_INCLUDED
