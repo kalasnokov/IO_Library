@@ -10,10 +10,6 @@ WRITE = 1
 maxLen = 64
 
 .text
-    .global foo
-    .global bar
-    .extern printf
-    .global increment
     .global inImage
     .global outImage
     .global putText
@@ -27,39 +23,8 @@ maxLen = 64
     .global getOutPos
     .global setOutPos
     .global getText
-
-foo:
-
-    mov $1,%rax
-    mov $1,%rdi
-    mov $msg,%rsi
-    mov $len,%rdx
-    syscall
-
-
-ret
-
-
-bar:
-
-    mov %rdi,%rsi
-    mov $1,%rax
-    mov $1,%rdi
-    mov $1,%rdx
-    syscall
-
-
-ret
-
-
-increment:
-
-    inc %rdi
-    mov %rdi,%rax
-
-
-ret
-
+    .global putInt
+    .global getInt
 
 inImage: #clears the inBuf, resets inPos to 0 and then takes user input (rdi,clearbuf,rax,rsi,rdx,syscall)
 
@@ -166,6 +131,7 @@ countNumbersInInt:      #lat lösning för att räkna antalet siffror i ett input t
     subq %r11,inPos
     subq $1,%rbx
 ret
+<<<<<<< HEAD
  
 getInt: #(rbx,rcx,r11,r10,rax,rsi)
     call countNumbersInInt  #antalet siffror i talet hamnar i rbx
@@ -197,10 +163,50 @@ getInt: #(rbx,rcx,r11,r10,rax,rsi)
  
     //kommer vi hit har vi en "siffra char" i rax
     subq $48,%rax   #subbar ascii offset, nu har vi ett värde 0-9 som vi kan bygga ett tal med.
+=======
+
+/*Rutinen ska tolka en sträng som börjar på aktuell buffertposition i inbufferten och fortsätta
+tills ett tecken som inte kan ingå i ett heltal påträffas. Den lästa substrängen översätts till
+heltalsformat och returneras. Positionen i bufferten ska vara det första tecken som inte
+ingick i det lästa talet när rutinen lämnas. Inledande blanktecken i talet ska vara tillåtna.
+april, 2017 3
+Bibliotek för in- och utmatning
+(Intel x64 assembler) DV1464/DV1493
+Ett plustecken eller ett minustecken ska kunna inleda talet och vara direkt följt av en eller
+flera heltalssiffror. Ett tal utan inledande plus eller minus ska alltid tolkas som positivt.
+Om inmatningsbufferten är tom eller om den aktuella positionen i inmatningsbufferten
+är vid dess slut vid anrop av getInt ska getInt kalla på inImage, så att getInt alltid
+returnerar värdet av ett inmatat tal.*/
+
+getInt: #(rbx,rcx,r11,r10,rax,rsi)
+    movq $0,%rbx //counter
+    movq $0,%rcx //total
+    movq $1,%r11 //tecken
+    GIloop:
+    call getChar
+    cmp $32,%rax //om space tecken, loopa till nästa tecken
+    addq $1,inPos
+    je GIloop
+    cmp $43,%rax //om + tecken, notera detta i tecken-variabeln och loopa vidare
+    movq $1,%r11
+    addq $1,inPos
+    je GIloop
+    cmp $45,%rax //om - tecken, notera detta i tecken-variabeln och loopa vidare
+    movq $-1,%r11
+    addq $1,inPos
+    je GIloop
+    cmp $48,%rax //om lägre än ascii 48, exit
+    jl GIexit
+    cmp $57,%rax //om högre än ascii 57, exit
+    jg GIexit
+    //kommer vi hit har vi en "siffra char" i rax
+    subq $48,%rax //subbar ascii offset
+>>>>>>> origin/master
     movq $1,%rsi
     cmpq $0,%rbx
     je GITenSkip
     movq %rbx,%r10
+<<<<<<< HEAD
  
     GITenloop: //ska multiplicera rsi(1 från början) med 10, %r10 gånger
     imulq $10,%rsi
@@ -229,6 +235,19 @@ getInt: #(rbx,rcx,r11,r10,rax,rsi)
     addq $1,inPos
     mov %rcx,%rax   #lägger över totalen i rax och returnar
     imulq %r11,%rax #multiplicerar med tecken
+=======
+    GITenloop: //ska multiplicera rsi(1 från början) med 10, %r10 gånger
+    imulq $10,%rsi
+    cmpq $0,%r10
+    jg GITenloop
+    GITenSkip:
+    imulq %rsi,%rax //multiplicerar nuvarande tal med rätt 10 mul, (om vi inte gick in tenloopen är denna 1)
+    addq %rax,%rcx //adderar det till totalen
+    addq $1,inPos
+    jmp GIloop //går vidare till nästa position
+    GIexit:
+    mov %rcx,%rax //lägger över totalen i rax och returnar
+>>>>>>> origin/master
 ret
 
 getCharNoInc: #returns char in inBuf[inPos], if inPos == 64 or inBuf length == 0 inImage will be called (rdi,rax,inImage,r8,r9)
@@ -396,7 +415,7 @@ setOutPos:  #sets outPos value, if input > bufLen then outPos == bufLen or if in
 ret
 
 
-getText: #receieves loaded address in rdi and lenght to read in rsi, writes the content of inBuf to the first argument
+getText: #receieves loaded address in rdi and lenght to read in rsi, writes the content of inBuf to the first argument (rcx,r8,r9,rdx,rdi,rax,rsi,rax)
 
     leaq inBuf,%rcx #inBuf loaded into rcx
 
@@ -424,6 +443,72 @@ getText: #receieves loaded address in rdi and lenght to read in rsi, writes the 
 
 ret
 
+putInt: #places the argument rdi in the outBuf at the outPos location (rdi,rax,rdx)
+
+    push %r12
+    movq $0,%r12 #if r12 = 0, param is negative, if r12 = 1, param is positive
+
+    bt $31,%rdi
+    jc PIneg
+
+        movq $1,%r12
+        notq %rdi
+
+        addq $1,%rdi
+
+    PIneg:
+    notq %rdi
+
+    addq $1,%rdi
+
+    movq %rdi,%rax
+    movq $0,%r9
+
+
+    PIloop1:
+
+        movq $0,%rdx
+        mov $10,%edi #delare satt till 10
+
+        idiv %edi #dela rax med 10
+
+
+        incq %r9 #räkna upp ett steg
+
+        pushq %rdx
+
+    cmp $0,%rax #om rax = 0 så kan vi ej dela mer
+    jne PIloop1
+
+    leaq outBuf,%rdi
+
+
+    cmp $0,%r12
+    jne PIpos
+
+        mov outPos,%r10
+        mov $'-',%r8
+        mov %r8,(%rdi,%r10,1)
+        incq outPos
+
+    PIpos:
+
+    PIloop2:
+
+        popq %r8
+        addq $48,%r8
+        mov outPos,%r10
+        mov %r8,(%rdi,%r10,1)
+        incq outPos
+        decq %r9
+
+    cmp $0,%r9
+    jne PIloop2
+
+    pop %r12
+
+ret
+
 
 exit:
     mov $0,%ebx
@@ -447,3 +532,4 @@ workBuf: .space 64
 inPos: .quad 0
 outPos: .quad 0
 workPos: .quad 0
+
