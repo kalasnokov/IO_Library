@@ -152,6 +152,7 @@ getInt: #(rbx,rcx,r11,r10,rax,rsi)
 ret
 
 getChar: #returns char in inBuf[inPos], if inPos == 64 or inBuf length == 0 inImage will be called (rdi,rax,inImage,r8,r9)
+
     leaq inBuf,%rdi
     call getBufLen
 
@@ -170,13 +171,6 @@ getChar: #returns char in inBuf[inPos], if inPos == 64 or inBuf length == 0 inIm
     mov inPos,%r9
     mov (%r8,%r9,1),%rax
 
-
-    ret
-
-
-    getInPos: #returns inPos value (rax)
-
-    movq inPos,%rax
 
 ret
 
@@ -293,8 +287,29 @@ ret
 
 
 getText: #receieves loaded address in rdi and lenght to read in rsi, writes the content of inBuf to the first argument (rcx,r8,r9,rdx,rdi,rax,rsi,rax)
-
+    push %rsi
+    push %rdi
     leaq inBuf,%rcx #inBuf loaded into rcx
+
+    leaq inBuf,%rdi
+    call getBufLen
+
+
+    cmp $0,%rax
+    jne GTcont
+        call inImage
+        jmp GTcont2
+    GTcont:
+
+    movq $inPos,%rsi
+
+    cmpq $maxLen,%rsi
+    jne GTcont2
+        call inImage
+    GTcont2:
+
+    pop %rdi
+    pop %rsi
 
     movq $0,%r8 #used as counter for parameter 1
     mov inPos,%r9
@@ -383,6 +398,12 @@ putInt: #places the argument rdi in the outBuf at the outPos location (rdi,rax,r
     jne PIloop2
 
     pop %r12
+
+ret
+
+getInPos:
+
+    movq inPos,%rax
 
 ret
 
