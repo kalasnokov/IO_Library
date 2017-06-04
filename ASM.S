@@ -28,6 +28,7 @@ maxLen = 64
     .global getOutPos
     .global setOutPos
     .global getText
+    .global putInt
 
 foo:
 
@@ -277,17 +278,16 @@ ret
 
 
 getText: #receieves loaded address in rdi and lenght to read in rsi, writes the content of inBuf to the first argument
-
     leaq inBuf,%rcx #inBuf loaded into rcx
 
-    movq $0,%r8 #used as counter for parameter 1
+    movq $0,%r8 #used as counter for parameter 1a
     mov inPos,%r9
 
     GTloop:
-    mov (%rcx,%r9,1),%rdx #char value now loaded in rdx
+    mov (%rcx,%r9,1),%dl #char value now loaded in rdx
     incq %r9
 
-    mov %rdx,(%rdi,%r8,1) #char value moved to parameter 1 pos r8
+    mov %dl,(%rdi,%r8,1) #char value moved to parameter 1 pos r8
 
     incq %r8
 
@@ -301,6 +301,11 @@ getText: #receieves loaded address in rdi and lenght to read in rsi, writes the 
     GTret:
 
     movq %r8,%rax
+
+ret
+
+putInt: #appends the int recevied in %rdi to the outBuf
+    movq %rdi,%rax
 
 ret
 
