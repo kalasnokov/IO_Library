@@ -2,9 +2,6 @@
 #define IOLIB_H_INCLUDED
 
 namespace{
-    extern "C" void foo();
-    extern "C" void bar(int* c);
-    extern "C" int increment(int i);
     extern "C" void inImage();
     extern "C" void outImage();
     extern "C" char getChar();

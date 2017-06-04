@@ -10,10 +10,6 @@ WRITE = 1
 maxLen = 64
 
 .text
-    .global foo
-    .global bar
-    .extern printf
-    .global increment
     .global inImage
     .global outImage
     .global putText
@@ -29,39 +25,6 @@ maxLen = 64
     .global getText
     .global putInt
     .global getInt
-
-foo:
-
-    mov $1,%rax
-    mov $1,%rdi
-    mov $msg,%rsi
-    mov $len,%rdx
-    syscall
-
-
-ret
-
-
-bar:
-
-    mov %rdi,%rsi
-    mov $1,%rax
-    mov $1,%rdi
-    mov $1,%rdx
-    syscall
-
-
-ret
-
-
-increment:
-
-    inc %rdi
-    mov %rdi,%rax
-
-
-ret
-
 
 inImage: #clears the inBuf, resets inPos to 0 and then takes user input (rdi,clearbuf,rax,rsi,rdx,syscall)
 
@@ -446,3 +409,4 @@ workBuf: .space 64
 inPos: .quad 0
 outPos: .quad 0
 workPos: .quad 0
+

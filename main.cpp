@@ -5,15 +5,6 @@
 using namespace std;
 int main()
 {
-    foo();
-    int* i = new int('K');
-    int* u = new int('U');
-    int e = 'T';
-    bar(i);
-    bar(u);
-    bar(&e);
-    cout << increment(10) << endl;
-    cout << endl;
 
     int k=0;
     //cin >> k;
@@ -64,7 +55,7 @@ int main()
     }
     cout << endl;
 
-    cout << "Div result: " << putInt(-11230) << endl;
+    putInt(-11230);
 
     outImage();
 
