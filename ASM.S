@@ -131,82 +131,151 @@ clearBuf: #clears the buffert loaded in rdi (rdi,r9)
     jle CBloop
 
 
+ret
+
+countNumbersInInt:      #lat lösning för att räkna antalet siffror i ett input tal.
+    movq $0,%rbx //counter
+    movq $0,%r11
+    movq $0,%r12
+ 
+    CNiterate:
+    call getCharNoInc
+    cmp $1,%r12
+    je CNspaceSkip
+    cmp $32,%rax
+    je CNloop
+    CNspaceSkip:
+    mov $1,%r12
+    cmp $'+',%rax
+    je CNloop
+    cmp $'-',%rax
+    je CNloop
+ 
+    cmp $47,%rax
+    jl CNexit
+    cmp $58,%rax
+    jg CNexit
+ 
+    addq $1,%rbx
+    jmp CNloop
+    CNloop:     #adderar pos och går vidare
+    addq $1,inPos
+    addq $1,%r11
+    jmp CNiterate
+    CNexit:    
+    subq %r11,inPos
+    subq $1,%rbx
+ret
+ 
+getInt: #(rbx,rcx,r11,r10,rax,rsi)
+    call countNumbersInInt  #antalet siffror i talet hamnar i rbx
+    movq $0,%rcx        #total
+    movq $1,%r11        #tecken
+    movq $0,%r12        #inga fler space, så inte funktionen läser ihop tal särskrivna med mellanslag till ett tal
+ 
+    GIiterate:
+    call getCharNoInc
+    cmp $1,%r12
+    je GIspaceSkip
+    cmp $' ',%rax //om space tecken, loopa till nästa tecken
+    je GIloop
+ 
+    GIspaceSkip:
+    mov $1,%r12
+    cmp $'-',%rax
+    debug1:
+    je GInegative
+    cmp $'+',%rax
+    debug2:
+    je GIpositive
+   
+ 
+    cmp $47,%rax //om lägre än ascii 48, exit
+    jl GIexit
+    cmp $58,%rax //om högre än ascii 57, exit
+    jg GIexit
+ 
+    //kommer vi hit har vi en "siffra char" i rax
+    subq $48,%rax   #subbar ascii offset, nu har vi ett värde 0-9 som vi kan bygga ett tal med.
+    movq $1,%rsi
+    cmpq $0,%rbx
+    je GITenSkip
+    movq %rbx,%r10
+ 
+    GITenloop: //ska multiplicera rsi(1 från början) med 10, %r10 gånger
+    imulq $10,%rsi
+    cmpq $0,%r10
+    subq $1,%r10
+    jg GITenloop
+ 
+    GITenSkip:
+    imulq %rsi,%rax     #multiplicerar nuvarande tal med rätt 10 mul, (om vi inte gick in tenloopen är denna 1)
+    addq %rax,%rcx  #adderar det till totalen
+    subq $1,%rbx
+    jmp GIloop     
+ 
+    GInegative:
+    movq $-1,%r11
+    jmp GIloop
+ 
+    GIpositive:
+    movq $1,%r11
+    jmp GIloop
+ 
+    GIloop:     #adderar pos och går vidare
+    addq $1,inPos
+    jmp GIiterate
+    GIexit:
+    addq $1,inPos
+    mov %rcx,%rax   #lägger över totalen i rax och returnar
+    imulq %r11,%rax #multiplicerar med tecken
 ret
 
-/*Rutinen ska tolka en sträng som börjar på aktuell buffertposition i inbufferten och fortsätta
-tills ett tecken som inte kan ingå i ett heltal påträffas. Den lästa substrängen översätts till
-heltalsformat och returneras. Positionen i bufferten ska vara det första tecken som inte
-ingick i det lästa talet när rutinen lämnas. Inledande blanktecken i talet ska vara tillåtna.
-april, 2017 3
-Bibliotek för in- och utmatning
-(Intel x64 assembler) DV1464/DV1493
-Ett plustecken eller ett minustecken ska kunna inleda talet och vara direkt följt av en eller
-flera heltalssiffror. Ett tal utan inledande plus eller minus ska alltid tolkas som positivt.
-Om inmatningsbufferten är tom eller om den aktuella positionen i inmatningsbufferten
-är vid dess slut vid anrop av getInt ska getInt kalla på inImage, så att getInt alltid
-returnerar värdet av ett inmatat tal.*/
-
-getInt: (rbx,rcx,r11,r10,rax,rsi)
-movq $0,%rbx //counter
-movq $0,%rcx //total
-movq $1,%r11 //tecken
-GIloop:
-call getChar
-cmp $32,%rax //om space tecken, loopa till nästa tecken
-addeq $1,$inPos
-je GIloop
-cmp $43,%rax //om + tecken, notera detta i tecken-variabeln och loopa vidare
-moveq $1,%r11
-addeq $1,$inPos
-je GIloop
-cmp $45,%rax //om - tecken, notera detta i tecken-variabeln och loopa vidare
-moveq $-1,%r11
-addeq $1,$inPos
-je GIloop
-cmp $48,%rax //om lägre än ascii 48, exit
-jl GIexit
-cmp $57,%rax //om högre än ascii 57, exit
-jg GIexit
-//kommer vi hit har vi en "siffra char" i rax
-subq $48,%rax //subbar ascii offset
-movq $1,%rsi
-cmpq $0,%rbx
-je GITenSkip
-movq %rbx,%r10
-GITenloop: //ska multiplicera rsi(1 från början) med 10, %r10 gånger
-mulq $10,%rsi
-cmpq $0,%r10
-jg GITenLoop
-GITenSkip:
-mulq %rsi,%rax //multiplicerar nuvarande tal med rätt 10 mul, (om vi inte gick in tenloopen är denna 1)
-addq %rax,%rcx //adderar det till totalen
-addq $1,$inPos
-jmp GIloop //går vidare till nästa position
-GIexit:
-mov %rcx,%rax //lägger över totalen i rax och returnar
-ret
-
+getCharNoInc: #returns char in inBuf[inPos], if inPos == 64 or inBuf length == 0 inImage will be called (rdi,rax,inImage,r8,r9)
+    leaq inBuf,%rdi
+    call getBufLen
+ 
+    cmp $0,%rax
+    jne GCNcont1
+    call inImage
+ 
+    GCNcont1:
+ 
+    cmp $64,inPos
+    jne GCNcont2
+    call inImage
+ 
+    GCNcont2:
+    leaq inBuf,%r8
+    mov inPos,%r9
+    movq $0,%rax
+    movb (%r8,%r9,1),%al #lägsta 8 bits i rax
+ 
+ 
+    ret
+ 
 getChar: #returns char in inBuf[inPos], if inPos == 64 or inBuf length == 0 inImage will be called (rdi,rax,inImage,r8,r9)
     leaq inBuf,%rdi
     call getBufLen
-
+ 
     cmp $0,%rax
     jne GCcont1
     call inImage
-
+ 
     GCcont1:
-
+ 
     cmp $64,inPos
     jne GCcont2
     call inImage
-
+ 
     GCcont2:
     leaq inBuf,%r8
     mov inPos,%r9
-    mov (%r8,%r9,1),%rax
-
-
-    ret
+    movq $0,%rax
+    movb (%r8,%r9,1),%al #lägsta 8 bits i rax
+    addq $1,inPos
+ 
+ret
 
 
     getInPos: #returns inPos value (rax)
