@@ -16,7 +16,7 @@ namespace{
     extern "C" int getOutPos();
     extern "C" void putText(char* appender);
     extern "C" int getText(char* append_string, int amount_to_read);
-    extern "C" int putInt(int value);
+    extern "C" void putInt(int value);
     extern "C" int getInt();
 }
 

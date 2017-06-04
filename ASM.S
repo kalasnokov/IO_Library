@@ -329,7 +329,7 @@ setOutPos:  #sets outPos value, if input > bufLen then outPos == bufLen or if in
 ret
 
 
-getText: #receieves loaded address in rdi and lenght to read in rsi, writes the content of inBuf to the first argument
+getText: #receieves loaded address in rdi and lenght to read in rsi, writes the content of inBuf to the first argument (rcx,r8,r9,rdx,rdi,rax,rsi,rax)
 
     leaq inBuf,%rcx #inBuf loaded into rcx
 
@@ -357,10 +357,69 @@ getText: #receieves loaded address in rdi and lenght to read in rsi, writes the 
 
 ret
 
-putInt:
+putInt: #places the argument rdi in the outBuf at the outPos location (rdi,rax,rdx)
+
+    push %r12
+    movq $0,%r12 #if r12 = 0, param is negative, if r12 = 1, param is positive
+
+    bt $31,%rdi
+    jc PIneg
+
+        movq $1,%r12
+        notq %rdi
+
+        addq $1,%rdi
+
+    PIneg:
+    notq %rdi
+
+    addq $1,%rdi
+
+    movq %rdi,%rax
+    movq $0,%r9
 
 
+    PIloop1:
 
+        movq $0,%rdx
+        mov $10,%edi #delare satt till 10
+
+        idiv %edi #dela rax med 10
+
+
+        incq %r9 #räkna upp ett steg
+
+        pushq %rdx
+
+    cmp $0,%rax #om rax = 0 så kan vi ej dela mer
+    jne PIloop1
+
+    leaq outBuf,%rdi
+
+
+    cmp $0,%r12
+    jne PIpos
+
+        mov outPos,%r10
+        mov $'-',%r8
+        mov %r8,(%rdi,%r10,1)
+        incq outPos
+
+    PIpos:
+
+    PIloop2:
+
+        popq %r8
+        addq $48,%r8
+        mov outPos,%r10
+        mov %r8,(%rdi,%r10,1)
+        incq outPos
+        decq %r9
+
+    cmp $0,%r9
+    jne PIloop2
+
+    pop %r12
 
 ret
 

@@ -64,7 +64,9 @@ int main()
     }
     cout << endl;
 
-    cout << putInt(12) << endl;
+    cout << "Div result: " << putInt(-11230) << endl;
+
+    outImage();
 
     cout <<endl<< "Code has returned and is exiting" << endl;
     return 0;
