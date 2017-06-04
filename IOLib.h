@@ -17,6 +17,7 @@ namespace{
     extern "C" void putText(char* appender);
     extern "C" int getText(char* append_string, int amount_to_read);
     extern "C" int putInt(int value);
+    extern "C" int getInt();
 }
 
 #endif // IOLIB_H_INCLUDED
