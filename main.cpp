@@ -361,7 +361,7 @@ int main()
 
     cout << "Char: " << getChar() << endl;
     cout << "Pos: " << getInPos() << endl;
-    setInPos(5);
+    setInPos(0);
     cout << "Char: " << getChar() << endl;
     cout << "Pos: " << getInPos() << endl;
 
@@ -382,6 +382,8 @@ int main()
     //outImage();
 
     cout << endl;
+
+    cout << "Pos: " << getInPos() << endl;
     char t2[100];
     cout << getText(t2,10) << endl;
     //getText(t,0);
@@ -393,6 +395,8 @@ int main()
         cout << (int)t2[i]<<" ";
     }
     cout << endl;
+
+    cout << putInt(12) << endl;
 
     cout <<endl<< "Code has returned and is exiting" << endl;
     return 0;
