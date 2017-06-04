@@ -134,6 +134,58 @@ clearBuf: #clears the buffert loaded in rdi (rdi,r9)
 
 ret
 
+/*Rutinen ska tolka en sträng som börjar på aktuell buffertposition i inbufferten och fortsätta
+tills ett tecken som inte kan ingå i ett heltal påträffas. Den lästa substrängen översätts till
+heltalsformat och returneras. Positionen i bufferten ska vara det första tecken som inte
+ingick i det lästa talet när rutinen lämnas. Inledande blanktecken i talet ska vara tillåtna.
+april, 2017 3
+Bibliotek för in- och utmatning
+(Intel x64 assembler) DV1464/DV1493
+Ett plustecken eller ett minustecken ska kunna inleda talet och vara direkt följt av en eller
+flera heltalssiffror. Ett tal utan inledande plus eller minus ska alltid tolkas som positivt.
+Om inmatningsbufferten är tom eller om den aktuella positionen i inmatningsbufferten
+är vid dess slut vid anrop av getInt ska getInt kalla på inImage, så att getInt alltid
+returnerar värdet av ett inmatat tal.*/
+
+getInt: (rbx,rcx,r11,r10,rax,rsi)
+movq $0,%rbx //counter
+movq $0,%rcx //total
+movq $1,%r11 //tecken
+GIloop:
+call getChar
+cmp $32,%rax //om space tecken, loopa till nästa tecken
+addeq $1,$inPos
+je GIloop
+cmp $43,%rax //om + tecken, notera detta i tecken-variabeln och loopa vidare
+moveq $1,%r11
+addeq $1,$inPos
+je GIloop
+cmp $45,%rax //om - tecken, notera detta i tecken-variabeln och loopa vidare
+moveq $-1,%r11
+addeq $1,$inPos
+je GIloop
+cmp $48,%rax //om lägre än ascii 48, exit
+jl GIexit
+cmp $57,%rax //om högre än ascii 57, exit
+jg GIexit
+//kommer vi hit har vi en "siffra char" i rax
+subq $48,%rax //subbar ascii offset
+movq $1,%rsi
+cmpq $0,%rbx
+je GITenSkip
+movq %rbx,%r10
+GITenloop: //ska multiplicera rsi(1 från början) med 10, %r10 gånger
+mulq $10,%rsi
+cmpq $0,%r10
+jg GITenLoop
+GITenSkip:
+mulq %rsi,%rax //multiplicerar nuvarande tal med rätt 10 mul, (om vi inte gick in tenloopen är denna 1)
+addq %rax,%rcx //adderar det till totalen
+addq $1,$inPos
+jmp GIloop //går vidare till nästa position
+GIexit:
+mov %rcx,%rax //lägger över totalen i rax och returnar
+ret
 
 getChar: #returns char in inBuf[inPos], if inPos == 64 or inBuf length == 0 inImage will be called (rdi,rax,inImage,r8,r9)
     leaq inBuf,%rdi
@@ -309,7 +361,6 @@ exit:
     mov $0,%ebx
     mov $1,%eax
     int $0x80
-
 
 
 
