@@ -450,14 +450,14 @@ putInt: #places the argument rdi in the outBuf at the outPos location (rdi,rax,r
 
 
     cmp $0,%r12
-    jne PIpos
+    jne PIpos1
 
         mov outPos,%r10
         mov $'-',%r8
         mov %r8,(%rdi,%r10,1)
         incq outPos
 
-    PIpos:
+    PIpos1:
 
     PIloop2:
 
@@ -471,9 +471,19 @@ putInt: #places the argument rdi in the outBuf at the outPos location (rdi,rax,r
     cmp $0,%r9
     jne PIloop2
 
+    mov outPos,%r10
+    mov $'\n',%r8
+    mov %r8,(%rdi,%r10,1)
+
+    cmp $0,%r12
+    je PIpos2
+        incq outPos
+    PIpos2:
+
     pop %r12
 
 ret
+
 
 getInPos:
 

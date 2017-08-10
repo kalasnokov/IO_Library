@@ -55,7 +55,9 @@ int main()
     }
     cout << endl;
 
-    putInt(-11230);
+    for(int i=0;i<100;i++){
+        putInt(i);
+    }
 
     outImage();
 
