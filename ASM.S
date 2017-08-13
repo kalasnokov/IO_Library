@@ -154,8 +154,8 @@ getInt: #(rbx,rcx,r11,r10,rax,rsi)
     je GIspaceSkip
     cmpb $' ',%al 	#om space tecken, loopa till nästa tecken
     je GIloop
-    
-    
+
+
     GIspaceSkip:
     mov $1,%r12
     cmpb $'-',%al
@@ -197,7 +197,7 @@ getInt: #(rbx,rcx,r11,r10,rax,rsi)
     GIpositive:
     movq $1,%r11
     jmp GIloop
-    
+
     GIerror:
     mov $0,%rax
     jmp GIret
@@ -486,10 +486,13 @@ putInt: #places the argument rdi in the outBuf at the outPos location (rdi,rax,r
     jne PIloop2
 
     mov outPos,%r10
-    mov $3,%r8
+    mov $127,%r8
     mov %r8,(%rdi,%r10,1)
 
-    incq outPos
+    cmp $0,%r12
+    je PIneg2
+        incq outPos
+    PIneg2:
 
     pop %r12
 
