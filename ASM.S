@@ -101,40 +101,48 @@ ret
 
 countNumbersInInt:      #lat lösning för att räkna antalet siffror i ett input tal.
     movq $0,%rbx //counter
-    movq $0,%r11
     movq $0,%r12
-
+    movq inPos,%r11
     CNiterate:
     call getCharNoInc
     cmp $1,%r12
     je CNspaceSkip
-    cmp $32,%rax
-    je CNloop
-    CNspaceSkip:
-    mov $1,%r12
-    cmp $'+',%rax
-    je CNloop
-    cmp $'-',%rax
+    cmpb $' ',%al
     je CNloop
 
-    cmp $47,%rax
+    CNspaceSkip:
+    mov $1,%r12
+    cmpb $'+',%al
+    je CNloop
+    cmpb $'-',%al
+    je CNloop
+
+    cmpb $'0',%al
     jl CNexit
-    cmp $58,%rax
+    cmpb $'9',%al
     jg CNexit
 
     addq $1,%rbx
     jmp CNloop
+
+
     CNloop:     #adderar pos och går vidare
-    addq $1,inPos
-    addq $1,%r11
+    incq inPos
     jmp CNiterate
     CNexit:
-    subq %r11,inPos
+    movq %r11,inPos
     subq $1,%rbx
 ret
 
 
 getInt: #(rbx,rcx,r11,r10,rax,rsi)
+    call getCharNoInc
+    cmpb $10,%al	#om tom buffer calla inImage
+    jg GIstart
+    call inImage
+    GItest:
+    movq $0,inPos
+    GIstart:
     call countNumbersInInt 	#antalet siffror i talet hamnar i rbx
     movq $0,%rcx 		#total
     movq $1,%r11 		#tecken
@@ -144,22 +152,23 @@ getInt: #(rbx,rcx,r11,r10,rax,rsi)
     call getCharNoInc
     cmp $1,%r12
     je GIspaceSkip
-    cmp $' ',%rax //om space tecken, loopa till nästa tecken
+    cmpb $' ',%al 	#om space tecken, loopa till nästa tecken
     je GIloop
-
+    
+    
     GIspaceSkip:
     mov $1,%r12
-    cmp $'-',%rax
+    cmpb $'-',%al
     debug1:
     je GInegative
-    cmp $'+',%rax
+    cmpb $'+',%al
     debug2:
     je GIpositive
 
 
-    cmp $47,%rax //om lägre än ascii 48, exit
+    cmpb $'0',%al
     jl GIexit
-    cmp $58,%rax //om högre än ascii 57, exit
+    cmpb $'9',%al
     jg GIexit
 
     //kommer vi hit har vi en "siffra char" i rax
@@ -188,14 +197,19 @@ getInt: #(rbx,rcx,r11,r10,rax,rsi)
     GIpositive:
     movq $1,%r11
     jmp GIloop
+    
+    GIerror:
+    mov $0,%rax
+    jmp GIret
 
     GIloop:		#adderar pos och går vidare
-    addq $1,inPos
+    incq inPos
     jmp GIiterate
     GIexit:
-    addq $1,inPos
+    #addq $1,inPos
     mov %rcx,%rax 	#lägger över totalen i rax och returnar
     imulq %r11,%rax	#multiplicerar med tecken
+    GIret:
 ret
 
 getCharNoInc: #returns char in inBuf[inPos], if inPos == 64 or inBuf length == 0 inImage will be called (rdi,rax,inImage,r8,r9)
