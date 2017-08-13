@@ -419,16 +419,17 @@ putInt: #places the argument rdi in the outBuf at the outPos location (rdi,rax,r
 
         movq $1,%r12
         notq %rdi
+
         addq $1,%rdi
 
     PIneg:
-
     notq %rdi
 
     addq $1,%rdi
 
     movq %rdi,%rax
     movq $0,%r9
+
 
     PIloop1:
 
@@ -450,7 +451,7 @@ putInt: #places the argument rdi in the outBuf at the outPos location (rdi,rax,r
 
     cmp $0,%r12
     jne PIpos1
-        incq outPos
+
         mov outPos,%r10
         mov $'-',%r8
         mov %r8,(%rdi,%r10,1)
@@ -471,8 +472,10 @@ putInt: #places the argument rdi in the outBuf at the outPos location (rdi,rax,r
     jne PIloop2
 
     mov outPos,%r10
-    mov $0,%r8
+    mov $3,%r8
     mov %r8,(%rdi,%r10,1)
+
+    incq outPos
 
     pop %r12
 
